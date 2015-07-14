@@ -35,7 +35,7 @@ module CopycopterClient
     # @param key [String] the key of the blurb to update
     # @param value [String] the new contents of the blurb
     def []=(key, value)
-      @cache_was_changed = false
+      @cache_was_changed = true
       lock { @queued[key] = value }
     end
 
