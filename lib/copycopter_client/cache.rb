@@ -20,6 +20,7 @@ module CopycopterClient
       @mutex = Mutex.new
       @queued = {}
       @started = false
+      @cache_was_changed = false
     end
 
     # Returns content for the given blurb.
@@ -34,6 +35,7 @@ module CopycopterClient
     # @param key [String] the key of the blurb to update
     # @param value [String] the new contents of the blurb
     def []=(key, value)
+      @cache_was_changed = false
       lock { @queued[key] = value }
     end
 
@@ -88,11 +90,16 @@ module CopycopterClient
     end
 
     def flush
-      with_queued_changes do |queued|
-        client.upload queued
+      if @cache_was_changed
+        begin
+          with_queued_changes do |queued|
+            client.upload queued
+          end
+          @cache_was_changed = false
+        rescue ConnectionError => error
+          logger.error error.message
+        end
       end
-    rescue ConnectionError => error
-      logger.error error.message
     end
 
     def download
