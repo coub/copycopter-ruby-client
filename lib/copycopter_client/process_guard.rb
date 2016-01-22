@@ -90,7 +90,7 @@ module CopycopterClient
 
             job_was_performed = perform_without_copycopter
 
-            if last_sync_at <= Time.now - 5.minutes
+            if last_sync_at.nil? || last_sync_at <= Time.now - 5.minutes
               cache.flush
             end
 
