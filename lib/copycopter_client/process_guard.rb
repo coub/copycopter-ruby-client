@@ -81,8 +81,23 @@ module CopycopterClient
         Resque::Job.class_eval do
           alias_method :perform_without_copycopter, :perform
           define_method :perform do
+            last_sync_path = Rails.root.join("tmp/copycopter_sync_timestamp")
+
+            if File.exists?(last_sync_path)
+              data = File.read(last_sync_path)
+              last_sync_at = Time.at(data.to_i)
+            end
+
             job_was_performed = perform_without_copycopter
-            cache.flush
+
+            if last_sync_at <= Time.now - 5.minutes
+              cache.flush
+            end
+
+            File.open(last_sync_path, 'w') do |f|
+              f.write(Time.now.to_i.to_s)
+            end
+
             job_was_performed
           end
         end
