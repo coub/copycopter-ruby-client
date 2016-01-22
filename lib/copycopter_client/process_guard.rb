@@ -92,11 +92,12 @@ module CopycopterClient
 
             if last_sync_at.nil? || last_sync_at <= Time.now - 5.minutes
               cache.flush
+
+              File.open(last_sync_path, 'w') do |f|
+                f.write(Time.now.to_i.to_s)
+              end
             end
 
-            File.open(last_sync_path, 'w') do |f|
-              f.write(Time.now.to_i.to_s)
-            end
 
             job_was_performed
           end
