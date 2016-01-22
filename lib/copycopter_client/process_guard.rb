@@ -81,7 +81,7 @@ module CopycopterClient
         Resque::Job.class_eval do
           alias_method :perform_without_copycopter, :perform
           define_method :perform do
-            last_sync_path = Rails.root.join("tmp/copycopter_sync_timestamp")
+            last_sync_path = "/tmp/copycopter_sync_timestamp"
 
             if File.exists?(last_sync_path)
               data = File.read(last_sync_path)
